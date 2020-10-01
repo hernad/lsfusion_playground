@@ -13,7 +13,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/lsfusion-3.jar!/" />
+          <root url="jar://$USER_HOME$/lsfusion-server-5.0-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

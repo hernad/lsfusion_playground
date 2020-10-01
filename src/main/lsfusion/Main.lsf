@@ -1,23 +1,21 @@
 MODULE Main;
-REQUIRE EvalScript, Currency;
+REQUIRE EvalScript, Currency, Static;
 
 showMessage() {
    MESSAGE 'Hello World Ernad Husremović!';
 }
-
-
-NAVIGATOR {
-   NEW FOLDER hello 'Hello' WINDOW toolbar {
-      NEW ACTION showMessage;
-   }
-}
-
-
 
 FORM formHelloWorld 'Forma1'
     PROPERTIES 'Polje1  :' = 'Hello world!';
 ;
 
 NAVIGATOR {
-    NEW formHelloWorld;
+   NEW FOLDER hello 'Hello' WINDOW toolbar {
+      NEW ACTION showMessage;
+      NEW FORM formHelloWorld;
+      NEW FORM directions;
+   }
 }
+
+
+

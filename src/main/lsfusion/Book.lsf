@@ -1,0 +1,55 @@
+MODULE Book;
+NAMESPACE Book;
+
+CLASS Book 'Book' ;
+name 'Name' = DATA ISTRING[100] (Book) IN id;
+  
+CLASS Order 'Order' ;
+date 'Datum Narudžbe' = DATA  DATE (Order);
+number 'Broj' = DATA STRING[10] (Order);
+  
+CLASS OrderDetail 'Order line' ;
+order 'Order' = DATA Order (OrderDetail) NONULL  DELETE ;
+  
+book 'Book' = DATA Book (OrderDetail) NONULL ;
+nameBook 'Book' (OrderDetail d) = name (book(d));
+  
+quantity 'Quantity' = DATA INTEGER (OrderDetail);
+price 'Price' = DATA NUMERIC[14,2] (OrderDetail);
+
+FORM order 'BookOrder' 
+    OBJECTS o = Order PANEL 
+    PROPERTIES (o) date, number
+  
+    OBJECTS d = OrderDetail
+    PROPERTIES (d) nameBook, quantity, price, NEW , DELETE 
+    FILTERS order (d) == o
+  
+    EDIT Order OBJECT o
+;
+ 
+  
+FORM orders 'BookOrders' 
+    OBJECTS o = Order
+     PROPERTIES (o) READONLY date COLUMN  HEADER  'datum narudžbe', number
+     PROPERTIES (o) NEWSESSION  NEW , EDIT , DELETE
+;
+
+DESIGN orders {
+     //fill = 1;
+     //MOVE BOX(o) {
+         MOVE PROPERTY(number(o)) {
+           foreground = #FF00FF;
+           alignment = CENTER;
+         }
+         MOVE PROPERTY(date(o)) {
+            charWidth = 15;
+         }
+     //}
+     
+}
+
+
+NAVIGATOR {
+     NEW orders;
+}

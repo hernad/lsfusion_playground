@@ -1,0 +1,32 @@
+MODULE Genre;
+
+CLASS Genre 'Genre';
+
+name 'Name' = DATA ISTRING[30] (Genre);
+
+FORM genre 'Genre' 
+    OBJECTS g = Genre PANEL 
+    PROPERTIES (g) name
+     
+    EDIT Genre OBJECT g
+;
+  
+FORM genres 'Genres' 
+    OBJECTS g = Genre
+     PROPERTIES (g) READONLY name
+     PROPERTIES (g) NEWSESSION  NEW , EDIT , DELETE
+;
+
+// Such a scheme (with three forms, instead of two) is most suitable in order to disable the ability to edit genres when selecting them, in order to minimize the likelihood of the user accidentally correcting information about genres. In this case, genres can be changed only on a special form.
+
+FORM readonlyGenres 'Readonly Genres' 
+    OBJECTS g = Genre
+     PROPERTIES (g) READONLY name
+  
+    LIST Genre OBJECT g
+;
+  
+NAVIGATOR {
+     NEW FORM genres;
+     NEW FORM readonlyGenres;
+}

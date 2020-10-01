@@ -1,0 +1,31 @@
+MODULE Static;
+
+
+// # default
+CLASS Direction 'Direction'
+{
+     // staticName staticCaption
+     north 'North',
+     east 'East',
+     south 'South',
+     west 'West'
+}
+  
+direction = DATA Direction();
+
+name 'Name' (Direction d) = staticCaption (d) IF d IS Direction;
+
+
+//showDirection {
+//     MESSAGE staticName (direction());
+//     MESSAGE staticCaption (direction());
+//}
+  
+// create a form by choosing an object of the Direction class
+FORM directions 'Directions'
+     OBJECTS d = Direction
+     PROPERTIES (d) READONLY staticName, staticCaption, name
+     PROPERTIES (d) NEWSESSION  NEW , EDIT , DELETE
+    
+     LIST Direction OBJECT d
+;
