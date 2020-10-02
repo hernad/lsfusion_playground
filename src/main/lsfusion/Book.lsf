@@ -17,17 +17,56 @@ nameBook 'Book' (OrderDetail d) = name (book(d));
 quantity 'Quantity' = DATA INTEGER (OrderDetail);
 price 'Price' = DATA NUMERIC[14,2] (OrderDetail);
 
+lastBookQuantity() = DATA LOCAL ISTRING[100] (); //nameBook(d) + ' quantity ' + quantity(d);
+
+lastBookQuantity2(OrderDetail d) = nameBook(d) + ' quantity ' + quantity(d);
+
+//showLastBookQuantity(OrderDetail d) {
+   //lastBookQuantity() <- 'OKKK';
+   //MESSAGE lastBookQuantity();
+   //lastBookQuantity() <- 'OKKK/2';
+   //MESSAGE lastBookQuantity();
+//   MESSAGE lastBookQuantity2(d);
+//}
+
+origPrice = DATA LOCAL NUMERIC[14,2] ();
+   
+priceChange (OrderDetail d) {
+
+   INPUT inp = NUMERIC[14,2] DO {
+      origPrice() <- price(d);
+      price(d) <- inp;
+      IF inp != origPrice() THEN
+          MESSAGE 'Price changed to ' + inp;
+      ELSE
+          MESSAGE 'Price not changed!'; 
+   }
+}
+
 FORM order 'BookOrder' 
     OBJECTS o = Order PANEL 
     PROPERTIES (o) date, number
   
     OBJECTS d = OrderDetail
-    PROPERTIES (d) nameBook, quantity, price, NEW , DELETE 
+    PROPERTIES (d) nameBook, quantity, NEW , DELETE 
+    PROPERTIES (d) price ON CHANGE priceChange( d)
     FILTERS order (d) == o
   
     EDIT Order OBJECT o
+    
+    EVENTS 
+           ON OK {
+              quantity(d) <- quantity(d) + 1;
+              // ASSERT: user interaction in transaction
+              // MESAGE ...
+              //lastBookQuantity() <- nameBook(d) + ' quantity ' + quantity(d);
+              //lastBookQuantity() <- 'OK';
+           }
 ;
  
+DESIGN order {
+
+}
   
 FORM orders 'BookOrders' 
     OBJECTS o = Order
@@ -51,5 +90,6 @@ DESIGN orders {
 
 
 NAVIGATOR {
-     NEW orders;
+     NEW FORM orders;
+     //NEW ACTION showLastBookQuantity;
 }

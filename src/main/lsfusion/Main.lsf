@@ -9,11 +9,19 @@ FORM formHelloWorld 'Forma1'
     PROPERTIES 'Polje1  :' = 'Hello world!';
 ;
 
+
+openFile() {
+   INPUT f = EXCELFILE DO {
+      
+   }
+}
+
 NAVIGATOR {
    NEW FOLDER hello 'Hello' WINDOW toolbar {
       NEW ACTION showMessage;
       NEW FORM formHelloWorld;
       NEW FORM directions;
+      NEW ACTION openFile;
    }
 }
 
