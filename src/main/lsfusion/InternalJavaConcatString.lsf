@@ -1,0 +1,21 @@
+MODULE Internal;
+
+concatString = DATA LOCAL TEXT();
+
+// concatenate input string, put result in concatString property
+internalAction1 INTERNAL  'ba.out.lsfusion1.action.Action1' (TEXT, TEXT);
+
+
+concat(TEXT s1, TEXT s2) {
+    EXEC internalAction1(s1, s2);
+    
+    MESSAGE concatString();
+}
+
+concatAB {
+   concat('a','b');
+}
+
+NAVIGATOR {
+   NEW ACTION concatAB;
+}

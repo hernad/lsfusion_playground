@@ -28,14 +28,14 @@ onStarted() + {
 }
 
 defaultCurrency = DATA Currency ();
-//  Валюта по умолчанию
-nameDefaultCurrency 'Default currency' = name(defaultCurrency()) CHARWIDTH 30;
+// Default currency
+nameDefaultCurrency 'Default currency' = name (defaultCurrency ()) CHARWIDTH 30;
 
-currency (sid) = GROUP AGGR (Currency currency) BY sid(currency);
+currency (sid) = GROUP AGGR (Currency currency) BY sid (currency);
 
-// Формы
+// Forms
 
-// Валюта
+// Currency
 FORM currency 'Currency'
     OBJECTS c = Currency PANEL
     PROPERTIES (c)  name, shortName, sid, symbol, documentName
@@ -43,7 +43,7 @@ FORM currency 'Currency'
     EDIT Currency OBJECT c
 ;
 
-// Валюты
+// Currencies
 FORM currencies 'Currencies'
     OBJECTS c = Currency
     PROPERTIES(c) READONLY name, shortName, sid, symbol, documentName
@@ -52,7 +52,7 @@ FORM currencies 'Currencies'
     PROPERTIES(c) NEWSESSION NEW, EDIT, DELETE 
 ;
 
-// Валюты
+// Currencies
 FORM dialogCurrencies 'Currencies'
     OBJECTS c = Currency
     PROPERTIES(c) READONLY name, shortName
@@ -71,135 +71,136 @@ DESIGN options {
     }
 }
 
-// ---------------------------------- Типы exchange ---------------------------- //
+// ---------------------------------- Exchange types ------------ ---------------- //
 
 
-CLASS TypeExchange 'Тип exchange';
-TABLE typeExchange(TypeExchange);
+CLASS TypeExchange 'Exchange type';
+TABLE typeExchange (TypeExchange);
 TABLE rateExchange (TypeExchange, Currency, DATE);
 
-name 'Наименование' = DATA ISTRING[50](TypeExchange) IN id;
+name 'Name' = DATA ISTRING[50] (TypeExchange) IN id;
 
-currency 'Валюта типа exchange'= DATA Currency (TypeExchange);
-nameCurrency 'Валюта типа exchange' (TypeExchange typeExchange) = name(currency(typeExchange)) IN base;
+currency 'Currency of the exchange type' = DATA Currency (TypeExchange);
+nameCurrency 'Currency of exchange type' (TypeExchange typeExchange) = name (currency (typeExchange)) IN base;
 
-FORM typeExchange 'Тип exchange'
+FORM typeExchange 'Exchange type'
     OBJECTS t = TypeExchange PANEL
-    PROPERTIES(t) name, nameCurrency
+    PROPERTIES (t) name, nameCurrency
     
     EDIT TypeExchange OBJECT t
 ;
 
-FORM dialogTypeExchange 'Типы exchange'
+FORM dialogTypeExchange 'Exchange types'
     OBJECTS t = TypeExchange PANEL
-    PROPERTIES(t) READONLY name, nameCurrency
+    PROPERTIES (t) READONLY name, nameCurrency
     
     LIST TypeExchange OBJECT t
 ;
-// Расчет курсов на дату
+// Calculate rates for the date
 
-rate 'Курс exchange' = DATA NUMERIC[20,13] (TypeExchange, Currency, DATE);
-typeExchange (name) = GROUP AGGR TypeExchange typeExchange WHERE typeExchange IS TypeExchange BY name(typeExchange);
+rate 'Exchange rate' = DATA NUMERIC[20,13] (TypeExchange, Currency, DATE);
+typeExchange (name) = GROUP AGGR TypeExchange typeExchange WHERE typeExchange IS TypeExchange BY name (typeExchange);
 
-rateOn 'Курс exchange' (TypeExchange typeExchange, Currency currency, DATE date) =
+rateOn 'Exchange rate' (TypeExchange typeExchange, Currency currency, DATE date) =
     GROUP
-          LAST rate(typeExchange, currency, DATE dateIn)
+          LAST rate (typeExchange, currency, DATE dateIn)
           ORDER dateIn
-          WHERE rate(typeExchange, currency, dateIn) AND dateIn <= date COMPLEX;
+          WHERE rate (typeExchange, currency, dateIn) AND dateIn <= date COMPLEX;
 
-curRate 'Текущий курс exchange' (TypeExchange typeExchange, Currency currency) =
-    rateOn(typeExchange, currency, currentDate());
+curRate 'Current exchange rate' (TypeExchange typeExchange, Currency currency) =
+    rateOn (typeExchange, currency, currentDate ());
 
-// -------------------------------------------- Курсы валют --------------------------------- //
+// -------------------------------------------- Currency rates - ------------------------------- //
 
-FORM dialogTypeExchangeCurrency 'Курс exchange на дату'
-    OBJECTS t=TypeExchange PANEL
-    OBJECTS c=Currency PANEL
-    OBJECTS d=DATE PANEL
-    PROPERTIES READONLY name(t),  nameCurrency(t), name(c)
-    PROPERTIES val=VALUE(d), rate(t,c,d)
+FORM dialogTypeExchangeCurrency 'Exchange rate for date'
+    OBJECTS t = TypeExchange PANEL
+    OBJECTS c = Currency PANEL
+    OBJECTS d = DATE PANEL
+    PROPERTIES READONLY name (t), nameCurrency (t), name (c)
+    PROPERTIES val = VALUE (d), rate (t, c, d)
 
 ;
+
 DESIGN dialogTypeExchangeCurrency {
     BOX {
         type = CONTAINERV;
-        MOVE BOX(t) {
-            MOVE PROPERTY(name(t)) { focusable = FALSE; charWidth = 40;}
+        MOVE BOX (t) {
+            MOVE PROPERTY (name (t)) {focusable = FALSE; charWidth = 40;}
         }
-        MOVE BOX(c){
+        MOVE BOX (c) {
             type = CONTAINERV;
-            MOVE BOX(d) {
+            MOVE BOX (d) {
                 type = CONTAINERH;
 
-                MOVE PROPERTY(rate(t,c,d));
+                MOVE PROPERTY (rate (t, c, d));
             };
             NEW row {
-                caption = 'Валюты exchange';
+                caption = 'Currencies exchange';
                 type = CONTAINERH;
-                MOVE PROPERTY(name(c)) { caption = 'Валюта (из)'; charWidth = 20;}
-                MOVE PROPERTY(nameCurrency(t)) { caption = 'Валюта (в)'; charWidth = 20;}
+                MOVE PROPERTY (name (c)) {caption = 'Currency (from)'; charWidth = 20;}
+                MOVE PROPERTY (nameCurrency (t)) {caption = 'Currency (in)'; charWidth = 20;}
             }
         }
     }
     MOVE TOOLBARBOX;
 }
 
-dialog 'Добавить' (TypeExchange typeExchange, Currency currency)  { SHOW dialogTypeExchangeCurrency OBJECTS t = typeExchange, c = currency; }  TOOLBAR;
-delete 'Удалить' (TypeExchange typeExchange, Currency currency, DATE date)  { rate(typeExchange, currency, date) <- NULL; } IMAGE 'delete.png';
+dialog 'Add' (TypeExchange typeExchange, Currency currency) {SHOW dialogTypeExchangeCurrency OBJECTS t = typeExchange, c = currency; } TOOLBAR;
+delete 'Delete' (TypeExchange typeExchange, Currency currency, DATE date) {rate (typeExchange, currency, date) <- NULL; } IMAGE 'delete.png';
 
 
 parent = DATA TypeExchange (TypeExchange);
-nameParent 'Родительский '  = name(parent(TypeExchange t));
+nameParent 'Parent' = name (parent (TypeExchange t));
 
-//typeTypeExchangeCurrency = GROUP AGGR t BY parentTypeExchange(t), currencyTypeExchange(t);
+// typeTypeExchangeCurrency = GROUP AGGR t BY parentTypeExchange (t), currencyTypeExchange (t);
 
-isRevers 'Обратный' = DATA BOOLEAN (TypeExchange);
+isRevers 'Reverse' = DATA BOOLEAN (TypeExchange);
 
-EXTEND FORM typeExchange    
-    PROPERTIES(t) nameParent, isRevers
+EXTEND FORM typeExchange
+    PROPERTIES (t) nameParent, isRevers
 ;
 
-//createCrosTypeExchangeCurrency 'Создать кросс-курс' = (type, currency) {
-//    IF NOT typeTypeExchangeCurrency(type, currency) THEN {
-//        NEW t = TypeExchange {
-//            currencyTypeExchange(t) <- currency;
-//            nameTypeExchange(t) <- ISTRING[50](CONCAT '', 'Кросс '+nameTypeExchange(type), '-('+shortNameCurrency(currency)+')');   
-//            parentTypeExchange(t) <- type;
-//            
-//            FOR  curRateTypeExchangeCurrency(type, c) DO {
-//                rateExchange(t, c, date) <- NUMERIC[20,13](curRateTypeExchangeCurrency(type, currency)/(curRateTypeExchangeCurrency(type, c) IF curRateTypeExchangeCurrency(type, c)!=0)) WHERE date == currentDate();   
-//            }
-//        }    
-//    } ELSE {
-//        MESSAGE 'Кросс-курс уже существует для данной валюты и типа exchange';
-//    } 
+// createCrosTypeExchangeCurrency 'Create cross rate' = (type, currency) {
+// IF NOT typeTypeExchangeCurrency (type, currency) THEN {
+// NEW t = TypeExchange {
+// currencyTypeExchange (t) <- currency;
+// nameTypeExchange (t) <- ISTRING [50] (CONCAT '', 'Cross' + nameTypeExchange (type), '- (' + shortNameCurrency (currency) + ')');
+// parentTypeExchange (t) <- type;
+//
+// FOR curRateTypeExchangeCurrency (type, c) DO {
+// rateExchange (t, c, date) <- NUMERIC [20,13] (curRateTypeExchangeCurrency (type, currency) / (curRateTypeExchangeCurrency (type, c) IF curRateTypeExchangeCurrency (type, c)! = 0)) WHERE date == currentDate ();
+//}
+//}
+//} ELSE {
+// MESSAGE 'The cross rate already exists for the given currency and exchange type';
+//}
 //};
 
-// Курсы валют
+// Currency rates
 FORM typeExchangeCurrencyDate 'Exchange rates'
 
     OBJECTS t = TypeExchange
-    PROPERTIES(t) READONLY name, nameCurrency, nameParent, isRevers
-    PROPERTIES(t) NEWSESSION NEW, EDIT, DELETE 
-    ORDERS nameCurrency(t)
+    PROPERTIES (t) READONLY name, nameCurrency, nameParent, isRevers
+    PROPERTIES (t) NEWSESSION NEW, EDIT, DELETE
+    ORDERS nameCurrency (t)
 
     OBJECTS c = Currency
-    PROPERTIES(c) READONLY name
-    PROPERTIES(c) NEWSESSION NEW, EDIT, DELETE 
-    PROPERTIES(t, c) READONLY curRate
-//    PROPERTIES(t, c)  createCrosTypeExchangeCurrency TOOLBAR
-    ORDERS name(c) 
+    PROPERTIES (c) READONLY name
+    PROPERTIES (c) NEWSESSION NEW, EDIT, DELETE
+    PROPERTIES (t, c) READONLY curRate
+// PROPERTIES (t, c) createCrosTypeExchangeCurrency TOOLBAR
+    ORDERS name (c)
 
-    FILTERGROUP inactive FILTER 'Есть курс' curRate(t, c) 'F11' DEFAULT    
+    FILTERGROUP inactive FILTER 'There is a course' curRate (t, c) 'F11' DEFAULT
 
     OBJECTS d = DATE LAST
-    PROPERTIES(d) READONLY VALUE
+    PROPERTIES (d) READONLY VALUE
 
-    PROPERTIES(t, c, d) rate
-    PROPERTIES(t, c) dialog DRAW d 
-    PROPERTIES(t, c, d) delete GRID
+    PROPERTIES (t, c, d) rate
+    PROPERTIES (t, c) dialog DRAW d
+    PROPERTIES (t, c, d) delete GRID
 
-    FILTERS rate(t, c, d)
+    FILTERS rate (t, c, d)
 
     LIST TypeExchange OBJECT t
 
@@ -211,19 +212,19 @@ DESIGN typeExchangeCurrencyDate {
         NEW split {
             fill = 1;
             type = SPLITV;
-            MOVE BOX(t);
+            MOVE BOX (t);
             NEW topContainer {
                 fill = 2;
                 type = TABBED;
                 NEW currentExchangeRates {
-                    // Текущие курсы
+                    // Current rates
                     caption = 'Current rate';
                     type = SPLITH;
-                    MOVE BOX(c);
-                    MOVE BOX(d);
+                    MOVE BOX (c);
+                    MOVE BOX (d);
                 }
                 NEW importExchangeRates {
-                    // Импорт курсов
+                    // Import courses
                     caption = 'Import rates';
                 }
             }
@@ -234,7 +235,7 @@ DESIGN typeExchangeCurrencyDate {
 
 NAVIGATOR {
     masterData {
-        // Валюты и курсы
+        // Currencies and rates
         NEW FOLDER currencyNavigator 'Currencies and rates' {
             NEW currencies;
             NEW typeExchangeCurrencyDate;
@@ -242,60 +243,60 @@ NAVIGATOR {
     }
 }
 
-// --------------------------------------------------- Макросы по добавлению валюты в документы ------------------------------------ //
+// ------------------------------------------------ --- Macros for adding currency to documents ------------------------------------ //
 META defineDocumentHeaderCurrency (object)
     currency (object) = DATA Currency (###object);
-    nameCurrency 'Валюта' (###object object)= name(currency(object)) IN documentPrm CHARWIDTH 10;
-    shortNameCurrency 'Валюта (сокр.)' (###object object) = shortName(currency(object));
+    nameCurrency 'Currency' (###object object) = name (currency (object)) IN documentPrm CHARWIDTH 10;
+    shortNameCurrency 'Currency (abbreviated)' (###object object) = shortName (currency (object));
 END
 META defineDocumentAbstractHeaderCurrency (object)
     currency (object) = ABSTRACT Currency (###object) MATERIALIZED;
-    nameCurrency 'Валюта' (###object object)= name(currency(object)) IN documentPrm CHARWIDTH 10;
-    shortNameCurrency 'Валюта (сокр.)' (###object object) = shortName(currency(object));
+    nameCurrency 'Currency' (###object object) = name (currency (object)) IN documentPrm CHARWIDTH 10;
+    shortNameCurrency 'Currency (abbreviated)' (###object object) = shortName (currency (object));
 END
 META defineDocumentInterfaceHeaderCurrency (object)
-    @defineDocumentAbstractHeaderCurrency(object);
-    @defineDocumentHeaderCurrency(user###object);
-    currency (User###object object) += currency(object);
+    @defineDocumentAbstractHeaderCurrency (object);
+    @defineDocumentHeaderCurrency (user ###object);
+    currency (User ###object object) + = currency (object);
 END
 
 META defineDocumentDetailCurrency (object, detail)
-    currency (###detail idetail) = currency(object(idetail)) MATERIALIZED;
-    nameCurrency 'Валюта' (###detail idetail) = nameCurrency(object(idetail));
-    shortNameCurrency 'Валюта (сокр.)' (###detail idetail) = shortName(currency(idetail));
+    currency (###detail idetail) = currency (object (idetail)) MATERIALIZED;
+    nameCurrency 'Currency' (###detail idetail) = nameCurrency (object (idetail));
+    shortNameCurrency 'Currency (abbreviated)' (###detail idetail) = shortName (currency (idetail));
 END
 META defineDocumentInterfaceDetailCurrency (object, detail)
-    @defineDocumentDetailCurrency(object, detail);
-    @defineDocumentDetailCurrency(user###object, user###detail);
+    @defineDocumentDetailCurrency (object, detail);
+    @defineDocumentDetailCurrency (user ###object, user ###detail);
 END
 
 META defineDocumentCurrency (object, detail)
-    @defineDocumentHeaderCurrency(object);
-    @defineDocumentDetailCurrency(object, detail);
+    @defineDocumentHeaderCurrency (object);
+    @defineDocumentDetailCurrency (object, detail);
 END
 META defineDocumentAbstractCurrency (object, detail)
-    @defineDocumentAbstractHeaderCurrency(object);
-    @defineDocumentDetailCurrency(object, detail);
+    @defineDocumentAbstractHeaderCurrency (object);
+    @defineDocumentDetailCurrency (object, detail);
 END
 META defineDocumentInterfaceCurrency (object, detail)
-    @defineDocumentInterfaceHeaderCurrency(object);
-    @defineDocumentInterfaceDetailCurrency(object, detail);
+    @defineDocumentInterfaceHeaderCurrency (object);
+    @defineDocumentInterfaceDetailCurrency (object, detail);
 END
 
 META defineDocumentCurrency (object)
-    @defineDocumentCurrency(object, object##Detail);
+    @defineDocumentCurrency (object, object ##Detail);
 END
 META defineDocumentAbstractCurrency (object)
-    @defineDocumentAbstractCurrency(object, object##Detail);
+    @defineDocumentAbstractCurrency (object, object ##Detail);
 END
 META defineDocumentInterfaceCurrency (object)
-    @defineDocumentInterfaceCurrency(object, object##Detail);
+    @defineDocumentInterfaceCurrency (object, object ##Detail);
 END
 
 META deriveDocumentCurrency (object, stockProp)
-    @deriveDocumentCurrency(object, stockProp, currencyStock);
+    @deriveDocumentCurrency (object, stockProp, currencyStock);
 END
 
 META deriveDocumentCurrency (object, objectProp, currencyProp)
-    currency (###object object) <- currency(objectProp(object)) WHEN CHANGED(objectProp(object));
+    currency (###object object) <- currency (objectProp (object)) WHEN CHANGED (objectProp (object));
 END
