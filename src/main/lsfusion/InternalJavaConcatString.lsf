@@ -1,4 +1,4 @@
-MODULE Internal;
+MODULE JavaConcatString;
 
 concatString = DATA LOCAL TEXT();
 
@@ -13,7 +13,7 @@ concat(TEXT s1, TEXT s2) {
 }
 
 concatAB {
-   concat('a','b');
+   concat('bring','.out');
 }
 
 NAVIGATOR {
